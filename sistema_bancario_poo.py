@@ -238,23 +238,29 @@ def cadastrar_cliente(clientes_cadastrados):
 
 
 def cadastrar_conta(clientes_cadastrados, contas_ativas):
-    print(len(contas_ativas.contas))
     numero = ""
     cpf = input("CPF: ")
     filtrar_cpf = [cliente for cliente in clientes_cadastrado.clientes if cliente.cpf == cpf]
-
+    conta_cadastrada = [conta for conta in contas_ativas.contas if conta.cliente.cpf == cpf]
+    
     if len(filtrar_cpf) == 0:
         print("Cliente não encontrado.")
+        return False
+     
+    if len(conta_cadastrada) == 1:
+        print("Conta já cadastrada.")
         return False
 
     for cliente in clientes_cadastrados.clientes:
         if cpf == cliente.cpf:
             if len(contas_ativas.contas) == 0:
                 numero = "1"
+                conta = Conta(cliente, numero)
+                contas_ativas.contas.append(conta)
             else:
-                numero = len(contas_ativas.contas)
-            conta = Conta(cliente, numero)
-            contas_ativas.contas.append(conta)
+                numero = len(contas_ativas.contas) + 1
+                conta = Conta(cliente, numero)
+                contas_ativas.contas.append(conta)
     return conta
 
 

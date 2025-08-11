@@ -255,12 +255,11 @@ def cadastrar_conta(clientes_cadastrados, contas_ativas):
         if cpf == cliente.cpf:
             if len(contas_ativas.contas) == 0:
                 numero = "1"
-                conta = Conta(cliente, numero)
-                contas_ativas.contas.append(conta)
             else:
                 numero = len(contas_ativas.contas) + 1
-                conta = Conta(cliente, numero)
-                contas_ativas.contas.append(conta)
+                
+            conta = Conta(cliente, numero)
+            contas_ativas.contas.append(conta)
     return conta
 
 

@@ -8,19 +8,19 @@ class Cliente:
     def __init__(self, nome, cpf):
         self.nome = nome
         self.cpf = cpf
-        
+
     def __str__(self):
         return f"Nome: {self.nome} CPF: {self.cpf}"
-    
+
 
 class ClientesCadastrados:
     def __init__(self):
         self.clientes = []
         self.contas_ativas = ContasAtivas()
-    
+
     def cadastrar_cliente(self, cliente):
         self.clientes.append(cliente)
-    
+
     def mostrar_clientes_cadastrados(self):
         for cliente in self.clientes:
             print(cliente)
@@ -29,44 +29,49 @@ class ClientesCadastrados:
 class ContasAtivas:
     def __init__(self):
         self.contas = []
-    
+
     def listar_contas(self):
         if len(self.contas) == 0:
             print("Nenhuma conta cadastrada.")
         for conta in self.contas:
-            print(f"Nome: {conta.cliente.nome} CPF: {conta.cliente.cpf} - Numero da Conta: {conta.numero}")
-
+            print(
+                f"Nome: {conta.cliente.nome} CPF: {conta.cliente.cpf} - Numero da Conta: {conta.numero}"
+            )
 
 
 class Historico:
     def __init__(self):
         self.transacoes = []
-    
+
     def registrar_transacao(self, transacao):
-        self.transacoes.append({
-            "tipo": transacao.__class__.__name__,
-            "valor": transacao.valor,
-            "data":  datetime.now().strftime("%d/%m/%Y %A %H:%M")
-        })
-    
+        self.transacoes.append(
+            {
+                "tipo": transacao.__class__.__name__,
+                "valor": transacao.valor,
+                "data": datetime.now().strftime("%d/%m/%Y %A %H:%M"),
+            }
+        )
+
     def listar_transacoes(self):
         for transacao in self.transacoes:
-            print(f"{transacao['tipo']:<20}  R${transacao['valor']:>8.2f} - {transacao['data']}")
+            print(
+                f"{transacao['tipo']:<20}  R${transacao['valor']:>8.2f} - {transacao['data']}"
+            )
 
 
 class Conta:
     def __init__(self, cliente, numero):
         self.cliente = cliente
-        self.numero = numero 
+        self.numero = numero
         self.agencia = "001"
         self.saldo = 0
         self.historico = Historico()
         self.saldo_poupanca = 0
-    
+
     def deposito(self, valor):
         deposito = Deposito(valor)
         deposito.realizar_transacao(self)
-    
+
     def saque(self, valor):
         saque = Saque(valor)
         saque.realizar_transacao(self)
@@ -81,16 +86,16 @@ class Conta:
             poupanca.realizar_transacao_poupanca(self)
             return True
         return False
-    
+
     def pix(self, valor, conta_recebedor):
         pix = PixEnviado(valor)
         pix.realizar_transacao_pix(self, conta_recebedor)
-  
-          
+
+
 class Transacao(ABC):
     def __init__(self, valor):
         self.valor = valor
-    
+
     @abstractmethod
     def realizar_transacao(self, conta):
         pass
@@ -99,7 +104,7 @@ class Transacao(ABC):
 class TransacaoPoupanca(ABC):
     def __init__(self, valor):
         self.valor = valor
-    
+
     @abstractmethod
     def realizar_transacao_poupanca(self, conta):
         pass
@@ -120,7 +125,7 @@ class DepositoPoupanca(TransacaoPoupanca):
             return False
         except ValueError:
             print("Digite um valor válido.")
-            
+
 
 class ResgatePoupanca(TransacaoPoupanca):
     def realizar_transacao_poupanca(self, conta):
@@ -169,8 +174,8 @@ class Saque(Transacao):
 
 class TransacaoPix(ABC):
     def __init__(self, valor):
-        self.valor = valor 
-    
+        self.valor = valor
+
     @abstractmethod
     def realizar_transacao_pix(self, conta):
         pass
@@ -186,11 +191,13 @@ class PixEnviado(TransacaoPix):
             conta.saldo -= self.valor
             conta_recebedor.saldo += self.valor
             conta.historico.registrar_transacao(self)
-            conta_recebedor.historico.transacoes.append({
-                "tipo": "Pix recebido",
-                "valor": self.valor,
-                "data": datetime.now().strftime("%d/%m/%Y %H:%M")
-            })
+            conta_recebedor.historico.transacoes.append(
+                {
+                    "tipo": "Pix recebido",
+                    "valor": self.valor,
+                    "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                }
+            )
 
 
 class Investimento:
@@ -206,47 +213,53 @@ class Investimento:
         else:
             self.conta.saldo -= valor
             self.conta.saldo_investimento += valor
-            self.conta.historico.registrar_transacao({
-                "tipi": "Investimento CDB",
-                "valor": self.valor,
-                "data": datetime.now().strftime("%d/%m/%Y %H:%M")
-            })
+            self.conta.historico.registrar_transacao(
+                {
+                    "tipi": "Investimento CDB",
+                    "valor": self.valor,
+                    "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                }
+            )
             return True
         return False
-    
+
 
 def cadastrar_cliente(clientes_cadastrados):
     cpf = input("CPF: ")
-    filtrar_cpf = [cliente for cliente in clientes_cadastrado.clientes if cliente.cpf == cpf]
+    filtrar_cpf = [
+        cliente for cliente in clientes_cadastrado.clientes if cliente.cpf == cpf
+    ]
     if len(filtrar_cpf) == 1:
         print("Cliente já cadastrado.")
         return False
-    
+
     if not re.fullmatch(r"\d+", cpf):
         print("CPF inválido.")
         return False
-    
-    
+
     nome = input("Nome: ")
     if not re.fullmatch(r"[A-Za-z]+(?:\s+[A-Za-z]+)+", nome):
         print("Nome inválido.")
         return False
-    
+
     cliente = Cliente(nome, cpf)
     clientes_cadastrados.cadastrar_cliente(cliente)
-    return cliente
 
 
 def cadastrar_conta(clientes_cadastrados, contas_ativas):
     numero = ""
     cpf = input("CPF: ")
-    filtrar_cpf = [cliente for cliente in clientes_cadastrado.clientes if cliente.cpf == cpf]
-    conta_cadastrada = [conta for conta in contas_ativas.contas if conta.cliente.cpf == cpf]
-    
+    filtrar_cpf = [
+        cliente for cliente in clientes_cadastrado.clientes if cliente.cpf == cpf
+    ]
+    conta_cadastrada = [
+        conta for conta in contas_ativas.contas if conta.cliente.cpf == cpf
+    ]
+
     if len(filtrar_cpf) == 0:
         print("Cliente não encontrado.")
         return False
-     
+
     if len(conta_cadastrada) == 1:
         print("Conta já cadastrada.")
         return False
@@ -257,10 +270,9 @@ def cadastrar_conta(clientes_cadastrados, contas_ativas):
                 numero = "1"
             else:
                 numero = len(contas_ativas.contas) + 1
-                
+
             conta = Conta(cliente, numero)
             contas_ativas.contas.append(conta)
-    return conta
 
 
 def enviar_pix(conta_rementente, contas_ativas):
@@ -317,23 +329,25 @@ def acessar_conta(contas_ativas):
 
 
 clientes_cadastrado = ClientesCadastrados()
-contas_ativas = ContasAtivas()   
+contas_ativas = ContasAtivas()
 
-  
+
 def main():
     while True:
         sleep(1)
         mensagem = " Bem-Vindo ao N&M Bank "
         print(mensagem.center(60, "="))
-        print("1- Cadastrar\n2- Criar conta\n3- Acessar conta\n4- Listar Contas\n5- Fechar programa")
+        print(
+            "1- Cadastrar\n2- Criar conta\n3- Acessar conta\n4- Listar Contas\n5- Fechar programa"
+        )
         print("=" * 60)
         opcao = input("Opção: ")
 
         if opcao == "1":
-            cliente = cadastrar_cliente(clientes_cadastrado)
+            cadastrar_cliente(clientes_cadastrado)
             sleep(1)
         elif opcao == "2":
-            conta = cadastrar_conta(clientes_cadastrado, contas_ativas)
+            cadastrar_conta(clientes_cadastrado, contas_ativas)
             sleep(1)
         elif opcao == "3":
             acessar_conta(contas_ativas)
